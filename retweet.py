@@ -3,6 +3,7 @@
 
 import tweepy
 import twitter
+import os
 
 consumer_key = ""
 consumer_secret = ""
@@ -15,6 +16,9 @@ auth.set_access_token(access_token, access_token_secret)
 bot = tweepy.API(auth)
 
 last_id_filename = "last_id_hashtag_" + hashtag
+rt_bot_path = os.path.dirname(os.path.abspath(__file__))
+save_file = "last_id_hashtag_%s" % hashtag.replace("#", "")
+last_id_file = os.path.join(rt_bot_path, save_file)
 
 try:
 	file = open(last_id_filename, "r")
