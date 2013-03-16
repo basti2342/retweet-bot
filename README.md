@@ -6,3 +6,4 @@ Python Retweet Bot
 * Put in your Twitter app credentials
 * Define your hashtag
 * $ python retweet.py
+* Add this call to your crontab to retweet all new tweets regularly
