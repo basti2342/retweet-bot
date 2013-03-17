@@ -33,12 +33,20 @@ except IOError:
 # search query
 twit = twitter.Twitter()
 timeline = twit.search(hashtag, since_id=savepoint, max_results=999)
-print "%d new items found." % len(timeline)
+
+if len(timeline) == 0:
+	print "No Tweets matched your search query."
+	quit()
+
+last_tweet_id = timeline[-1]["id"]
 
 # filter @replies out and reverse timeline
 timeline = filter(lambda status: status["text"][0] != "@", timeline)
 timeline.reverse()
 
+print "%d new Tweets found." % len(timeline)
+
+counter = 0
 # iterate the timeline and retweet
 for status in timeline:
 	try:
@@ -48,12 +56,14 @@ for status in timeline:
 			"message" : status["text"].encode('utf-8') }
 
 		bot.retweet(status["id"])
+		counter += 1
 	except tweepy.error.TweepError:
-		# just in case tweet got deleted in the meantime
+		# just in case tweet got deleted in the meantime or already retweetet
 		continue
 
+print "Finished. %d Tweets retweeted." % counter
+
 # write last retweeted tweet id to file
-if len(timeline) != 0:
-	with open(last_id_file, "w") as file:
-		file.write(str(timeline[-1]["id"]))
+with open(last_id_file, "w") as file:
+	file.write(str(last_tweet_id))
 
