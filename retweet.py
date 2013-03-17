@@ -58,7 +58,7 @@ for status in timeline:
 		bot.retweet(status["id"])
 		counter += 1
 	except tweepy.error.TweepError:
-		# just in case tweet got deleted in the meantime or already retweetet
+		# just in case tweet got deleted in the meantime or already retweeted
 		continue
 
 print "Finished. %d Tweets retweeted." % counter
