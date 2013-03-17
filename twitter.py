@@ -8,7 +8,7 @@ import urlparse
 
 # "Searching Twitter with Python" by Derrick Petzold
 # http://derrickpetzold.com/p/twitter-python-search/
-# (since_id added)
+# v1.1 (since_id added) licensed under CC BY-SA
 class Twitter(object):
 
 	search_url = 'http://search.twitter.com/search.json'
