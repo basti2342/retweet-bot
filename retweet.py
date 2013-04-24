@@ -2,25 +2,32 @@
 # -*- coding: utf-8 -*-
 
 import tweepy
-import twitter
 import os
 
-# provide your credentials and hashtag
+# provide your credentials
 consumer_key = ""
 consumer_secret = ""
 access_token = ""
 access_token_secret = ""
+
+# your hashtag or search query and tweet language (empty = all languages)
 hashtag = "#yourHashtag"
+tweetLanguage = ""
+
+# blacklisted users and words
+userBlacklist = []
+wordBlacklist = ["RT", u"♺"]
+
 
 # build savepoint path + file
-last_id_filename = "last_id_hashtag_%s" % hashtag.replace("#", "")
+last_id_filename = "last_id_hashtag_%s" % hashtag.replace("#", "").split(" ")[0]
 rt_bot_path = os.path.dirname(os.path.abspath(__file__))
 last_id_file = os.path.join(rt_bot_path, last_id_filename)
 
 # create bot
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
-bot = tweepy.API(auth)
+api = tweepy.API(auth)
 
 # retrieve last savepoint if available
 try:
@@ -31,17 +38,23 @@ except IOError:
 	print "No savepoint found. Trying to get as many results as possible."
 
 # search query
-twit = twitter.Twitter()
-timeline = twit.search(hashtag, since_id=savepoint, max_results=999)
+timelineIterator = tweepy.Cursor(api.search, q=hashtag, since_id=savepoint, lang=tweetLanguage).items()
+
+# put everything into a list to be able to sort/filter
+timeline = []
+for status in timelineIterator:
+	timeline.append(status)
 
 if len(timeline) == 0:
 	print "No Tweets matched your search query."
 	quit()
 
-last_tweet_id = timeline[-1]["id"]
+last_tweet_id = timeline[-1].id
 
-# filter @replies out and reverse timeline
-timeline = filter(lambda status: status["text"][0] != "@", timeline)
+# filter @replies/blacklisted words & users out and reverse timeline
+timeline = filter(lambda status: status.text[0] != "@", timeline)
+timeline = filter(lambda status: not any(word in status.text.split() for word in wordBlacklist), timeline)
+timeline = filter(lambda status: status.from_user not in userBlacklist, timeline)
 timeline.reverse()
 
 print "%d new Tweets found." % len(timeline)
@@ -51,11 +64,11 @@ counter = 0
 for status in timeline:
 	try:
 		print "(%(date)s) %(name)s: %(message)s\n" % \
-			{ "date" : status["created_at"].encode('utf-8'),
-			"name" : status["from_user"].encode('utf-8'),
-			"message" : status["text"].encode('utf-8') }
+			{ "date" : status.created_at,
+			"name" : status.from_user.encode('utf-8'),
+			"message" : status.text.encode('utf-8') }
 
-		bot.retweet(status["id"])
+		api.retweet(status.id)
 		counter += 1
 	except tweepy.error.TweepError:
 		# just in case tweet got deleted in the meantime or already retweeted
