@@ -67,7 +67,6 @@ for status in timeline:
 			"message" : status.text.encode('utf-8') }
 
 		api.retweet(status.id)
-		last_tweet_id = status.id
 		tw_counter += 1
 	except tweepy.error.TweepError:
 		# just in case tweet got deleted in the meantime or already retweeted
