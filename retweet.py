@@ -52,7 +52,7 @@ except IndexError:
 # filter @replies/blacklisted words & users out and reverse timeline
 timeline = filter(lambda status: status.text[0] != "@", timeline)
 timeline = filter(lambda status: not any(word in status.text.split() for word in wordBlacklist), timeline)
-timeline = filter(lambda status: status.from_user not in userBlacklist, timeline)
+timeline = filter(lambda status: status.author.screen_name not in userBlacklist, timeline)
 timeline.reverse()
 
 tw_counter = 0
@@ -63,7 +63,7 @@ for status in timeline:
 	try:
 		print "(%(date)s) %(name)s: %(message)s\n" % \
 			{ "date" : status.created_at,
-			"name" : status.from_user.encode('utf-8'),
+			"name" : status.author.screen_name.encode('utf-8'),
 			"message" : status.text.encode('utf-8') }
 
 		api.retweet(status.id)
