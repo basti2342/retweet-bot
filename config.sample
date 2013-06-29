@@ -1,7 +1,7 @@
 [settings]
 # your hashtag or search query and tweet language (empty = all languages)
-searchterm:#yourHashtag
-tweetlanguage:
+search_query:#yourHashtag
+tweet_language:
 
 [twitter]
 # (create an app on http://dev.twitter.com/)

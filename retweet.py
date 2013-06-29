@@ -10,8 +10,8 @@ config = ConfigParser.SafeConfigParser()
 config.read("config")
 
 # your hashtag or search query and tweet language (empty = all languages)
-hashtag = config.get("settings","searchterm")
-tweetLanguage = config.get("settings","tweetlanguage")
+hashtag = config.get("settings","search_query")
+tweetLanguage = config.get("settings","tweet_language")
 
 # blacklisted users and words
 userBlacklist = []
