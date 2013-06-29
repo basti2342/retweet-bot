@@ -23,8 +23,8 @@ rt_bot_path = os.path.dirname(os.path.abspath(__file__))
 last_id_file = os.path.join(rt_bot_path, last_id_filename)
 
 # create bot
-auth = tweepy.OAuthHandler(config.get("twitter","consumer_key"), config.get("twitter","consumer_secret")
-auth.set_access_token(config.get("twitter","access_token", config.get("twitter","access_token_secret")
+auth = tweepy.OAuthHandler(config.get("twitter","consumer_key"), config.get("twitter","consumer_secret"))
+auth.set_access_token(config.get("twitter","access_token", config.get("twitter","access_token_secret"))
 api = tweepy.API(auth)
 
 # retrieve last savepoint if available
