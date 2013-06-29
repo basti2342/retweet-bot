@@ -1,3 +1,8 @@
+[settings]
+# your hashtag or search query and tweet language (empty = all languages)
+hashtag:#yourHashtag
+tweetlanguage:
+
 [twitter]
 # (create an app on http://dev.twitter.com/)
 consumer_key: 
