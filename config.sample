@@ -1,6 +1,6 @@
 [settings]
 # your hashtag or search query and tweet language (empty = all languages)
-hashtag:#yourHashtag
+searchterm:#yourHashtag
 tweetlanguage:
 
 [twitter]
