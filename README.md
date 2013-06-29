@@ -6,8 +6,9 @@ This script retweets all Tweets containing your search term. To limit Twitter re
 How to start:
 -------------
 * Depends on http://tweepy.github.com/ (pip install tweepy)
-* Put in your Twitter app credentials
+* Copy 'config.sample' to 'config'
 * Define your hashtag or search query
+* Put in your Twitter app credentials
 * (Tune some other options if you like)
 * $ python retweet.py
-* Add this call to your crontab (or something similar) to retweet all new Tweets regularly
+* Add this call to your crontab (or something similar) to retweet all new tweets regularly
