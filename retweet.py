@@ -4,10 +4,13 @@
 import tweepy
 import os
 import ConfigParser
+import inspect
+
+path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 
 # read config
 config = ConfigParser.SafeConfigParser()
-config.read("config")
+config.read(os.path.join(path, "config")
 
 # your hashtag or search query and tweet language (empty = all languages)
 hashtag = config.get("settings","search_query")
