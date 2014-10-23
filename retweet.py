@@ -70,9 +70,10 @@ for status in timeline:
 
 		api.retweet(status.id)
 		tw_counter += 1
-	except tweepy.error.TweepError:
+	except tweepy.error.TweepError as e:
 		# just in case tweet got deleted in the meantime or already retweeted
 		err_counter += 1
+		#print e
 		continue
 
 print "Finished. %d Tweets retweeted, %d errors occured." % (tw_counter, err_counter)
