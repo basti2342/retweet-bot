@@ -1,10 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import tweepy
-import os
-import ConfigParser
-import inspect
+import os, ConfigParser, tweepy, inspect, hashlib
 
 path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 
@@ -21,7 +18,8 @@ userBlacklist = []
 wordBlacklist = ["RT", u"♺"]
 
 # build savepoint path + file
-last_id_filename = "last_id_hashtag_%s" % hashtag.replace("#", "").split(" ")[0]
+hashedHashtag = hashlib.md5(hashtag).hexdigest()
+last_id_filename = "last_id_hashtag_%s" % hashedHashtag
 rt_bot_path = os.path.dirname(os.path.abspath(__file__))
 last_id_file = os.path.join(rt_bot_path, last_id_filename)
 
