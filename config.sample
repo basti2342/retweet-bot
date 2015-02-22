@@ -1,10 +1,10 @@
 [settings]
-# your hashtag or search query and tweet language (empty = all languages)
 search_query:#yourHashtag
+# Leave empty for all languages
 tweet_language:
 
+# Create your app on http://apps.twitter.com
 [twitter]
-# (create an app on http://dev.twitter.com/)
 consumer_key:
 consumer_secret:
 access_token:
