@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, ConfigParser, tweepy, inspect, hashlib
+import os, ConfigParser, tweepy, inspect, hashlib, ast
 
 path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 
