@@ -14,6 +14,5 @@ access_token_secret:
 [preferences]
 # blacklisted_users = ['example_user_1','example_user_2']
 blacklisted_users = []
-
 # blacklisted_words = ["example_word_1", "example_word_2"]
 blacklisted_words = []
