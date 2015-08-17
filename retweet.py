@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, ConfigParser, tweepy, inspect, hashlib
+import os, ConfigParser, tweepy, inspect, hashlib, ast
 
 path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 
@@ -14,8 +14,9 @@ hashtag = config.get("settings","search_query")
 tweetLanguage = config.get("settings","tweet_language")
 
 # blacklisted users and words
-userBlacklist = []
-wordBlacklist = ["RT", u"♺"]
+userBlacklist = ast.literal_eval(config.get("preferences", "blacklisted_users"))
+wordBlacklist = ast.literal_eval(config.get("preferences", "blacklisted_words"))
+wordBlacklist.extend(["RT", u"♺"])
 
 # build savepoint path + file
 hashedHashtag = hashlib.md5(hashtag).hexdigest()

@@ -9,3 +9,10 @@ consumer_key:
 consumer_secret:
 access_token:
 access_token_secret:
+
+# Leave blank if you don't want to blacklist any users or words
+[preferences]
+# blacklisted_users = ['example_user_1','example_user_2']
+blacklisted_users = []
+# blacklisted_words = ["example_word_1", "example_word_2"]
+blacklisted_words = []
