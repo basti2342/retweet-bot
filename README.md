@@ -1,6 +1,8 @@
 Python Retweet Bot
 ==================
 
+![alt text](https://img.shields.io/badge/python-3.5-green.svg "Python3.5")
+
 This script retweets all Tweets containing your search term. To limit Twitter requests a savepoint file marks Tweets found before. It's Twitter API v1.1 ready.
 
 Dependecies:
@@ -11,7 +13,7 @@ Dependecies:
 
 * Or alternatively
 
-```pip install requirements.txt```
+```pip install -r requirements.txt```
 
 How to start:
 -------------
