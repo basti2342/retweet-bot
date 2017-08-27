@@ -1,0 +1,8 @@
+version: '2'
+
+services:
+  bot:
+    build: .
+    image: retweet-bot
+    volumes:
+      - .:/app
