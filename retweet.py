@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, configparser, tweepy, inspect, hashlib
+import os, configparser, tweepy, inspect, hashlib, schedule, time
 
 path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 
@@ -14,6 +14,8 @@ hashtag = config.get("settings", "search_query")
 
 # if you would like to automatically follow those who use the hashtag
 auto_follow = config.getboolean("settings", "auto_follow")
+
+frequency = auto_follow = config.getboolean("settings", "run_frequency_in_minutes")
 
 # Number retweets per time
 num = int(config.get("settings","max_num_retweets"))
@@ -33,73 +35,82 @@ auth = tweepy.OAuthHandler(config.get("twitter", "consumer_key"), config.get("tw
 auth.set_access_token(config.get("twitter", "access_token"), config.get("twitter", "access_token_secret"))
 api = tweepy.API(auth)
 
-friends = api.friends_ids(config.get("settings", "retweet_account"))
 
-# retrieve last savepoint if available
-try:
-    with open(last_id_file, "r") as file:
-        savepoint = file.read()
-except IOError:
-    savepoint = ""
-    print("No savepoint found. Bot is now searching for results")
+def retweet_bot():
 
-# search query
-timelineIterator = tweepy.Cursor(api.search, q=hashtag, since_id=savepoint).items(num)
+    friends = api.friends_ids(config.get("settings", "retweet_account"))
 
-# put everything into a list to be able to sort/filter
-timeline = []
-for status in timelineIterator:
-    timeline.append(status)
-
-
-try:
-    last_tweet_id = timeline[0].id
-except IndexError:
-    last_tweet_id = savepoint
-
-# filter @replies/blacklisted words & users out and reverse timeline
-#timeline = filter(lambda status: status.text[0] = "@", timeline)   - uncomment to remove all tweets with an @mention
-timeline = filter(lambda status: not any(word in status.text.split() for word in wordBlacklist), timeline)
-timeline = filter(lambda status: status.author.screen_name not in userBlacklist, timeline)
-# timeline = filter(lambda status: status.author.id in friends, timeline)
-timeline = list(timeline)
-timeline.reverse()
-
-tw_counter = 0
-err_counter = 0
-
-# iterate the timeline and retweet
-for status in timeline:
+    # retrieve last savepoint if available
     try:
-        print("(%(date)s) %(name)s: %(message)s\n" % \
-              {"date": status.created_at,
-               "name": status.author.screen_name.encode('utf-8'),
-               "message": status.text.encode('utf-8')})
+        with open(last_id_file, "r") as file:
+            savepoint = file.read()
+    except IOError:
+        savepoint = ""
+        print("No savepoint found. Bot is now searching for results")
 
-        # api.retweet(status.id)
+    # search query
+    timelineIterator = tweepy.Cursor(api.search, q=hashtag, since_id=savepoint).items(num)
 
-        if auto_follow and status.author.id not in friends:
+    # put everything into a list to be able to sort/filter
+    timeline = []
+    for status in timelineIterator:
+        timeline.append(status)
 
-            try:
-                print("Auto-followiing: %(name)s" % \
-                  {"name": status.author.screen_name.encode('utf-8')})
-                # api.create_friendship(status.author)
-            except tweepy.error.TweepError as e:
-                print("Unable to follow " + status.author.id)
-                print(e)
-                err_counter += 1
 
-            friends.append(status.author.id)
+    try:
+        last_tweet_id = timeline[0].id
+    except IndexError:
+        last_tweet_id = savepoint
 
-        tw_counter += 1
-    except tweepy.error.TweepError as e:
-        # just in case tweet got deleted in the meantime or already retweeted
-        err_counter += 1
-        # print e
-        continue
+    # filter @replies/blacklisted words & users out and reverse timeline
+    #timeline = filter(lambda status: status.text[0] = "@", timeline)   - uncomment to remove all tweets with an @mention
+    timeline = filter(lambda status: not any(word in status.text.split() for word in wordBlacklist), timeline)
+    timeline = filter(lambda status: status.author.screen_name not in userBlacklist, timeline)
+    # timeline = filter(lambda status: status.author.id in friends, timeline)
+    timeline = list(timeline)
+    timeline.reverse()
 
-print("Finished. %d Tweets retweeted, %d errors occured." % (tw_counter, err_counter))
+    tw_counter = 0
+    err_counter = 0
 
-# write last retweeted tweet id to file
-with open(last_id_file, "w") as file:
-    file.write(str(last_tweet_id))
+    # iterate the timeline and retweet
+    for status in timeline:
+        try:
+            print("(%(date)s) %(name)s: %(message)s\n" % \
+                  {"date": status.created_at,
+                   "name": status.author.screen_name.encode('utf-8'),
+                   "message": status.text.encode('utf-8')})
+
+            # api.retweet(status.id)
+
+            if auto_follow and status.author.id not in friends:
+
+                try:
+                    print("Auto-followiing: %(name)s" % \
+                      {"name": status.author.screen_name.encode('utf-8')})
+                    # api.create_friendship(status.author)
+                except tweepy.error.TweepError as e:
+                    print("Unable to follow " + status.author.id)
+                    print(e)
+                    err_counter += 1
+
+                friends.append(status.author.id)
+
+            tw_counter += 1
+        except tweepy.error.TweepError as e:
+            # just in case tweet got deleted in the meantime or already retweeted
+            err_counter += 1
+            # print e
+            continue
+
+    print("Finished. %d Tweets retweeted, %d errors occured." % (tw_counter, err_counter))
+
+    # write last retweeted tweet id to file
+    with open(last_id_file, "w") as file:
+        file.write(str(last_tweet_id))
+
+schedule.every(frequency).minutes.do(retweet_bot)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
