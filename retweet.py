@@ -12,10 +12,13 @@ config.read(os.path.join(path, "config"))
 # your hashtag or search query and tweet language (empty = all languages)
 hashtag = config.get("settings", "search_query")
 
-# if you would like to automatically follow those who use the hashtag
+# if you would like to automatically follow once you retweet
 auto_follow = config.getboolean("settings", "auto_follow")
 
-frequency = auto_follow = config.getboolean("settings", "run_frequency_in_minutes")
+# if you would only like to retweet people you follow (overrides auto-follow)
+only_retweet_friends = config.getboolean("settings", "only_retweet_friends")
+
+frequency = auto_follow = config.getint("settings", "run_frequency_in_minutes")
 
 # Number retweets per time
 num = int(config.get("settings","max_num_retweets"))
@@ -23,6 +26,7 @@ num = int(config.get("settings","max_num_retweets"))
 # blacklisted users and words
 userBlacklist = []
 wordBlacklist = ["RT", u"♺"]
+friends = []
 
 # build savepoint path + file
 hashedHashtag = hashlib.md5(hashtag.encode('ascii')).hexdigest()
@@ -35,10 +39,17 @@ auth = tweepy.OAuthHandler(config.get("twitter", "consumer_key"), config.get("tw
 auth.set_access_token(config.get("twitter", "access_token"), config.get("twitter", "access_token_secret"))
 api = tweepy.API(auth)
 
+def refresh_friends():
+    try:
+        friends = api.friends_ids(config.get("settings", "retweet_account"))
+        print("Friends refreshed")
+    except Exception as e:
+        print("friends refresh failed")
+        print(e)
+
+refresh_friends()
 
 def retweet_bot():
-
-    friends = api.friends_ids(config.get("settings", "retweet_account"))
 
     # retrieve last savepoint if available
     try:
@@ -66,7 +77,10 @@ def retweet_bot():
     #timeline = filter(lambda status: status.text[0] = "@", timeline)   - uncomment to remove all tweets with an @mention
     timeline = filter(lambda status: not any(word in status.text.split() for word in wordBlacklist), timeline)
     timeline = filter(lambda status: status.author.screen_name not in userBlacklist, timeline)
-    # timeline = filter(lambda status: status.author.id in friends, timeline)
+
+    if only_retweet_friends:
+        timeline = filter(lambda status: status.author.id in friends, timeline)
+
     timeline = list(timeline)
     timeline.reverse()
 
@@ -110,6 +124,7 @@ def retweet_bot():
         file.write(str(last_tweet_id))
 
 schedule.every(frequency).minutes.do(retweet_bot)
+schedule.every(2).minutes.do(refresh_friends)
 
 while True:
     schedule.run_pending()
