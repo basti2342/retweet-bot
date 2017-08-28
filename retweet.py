@@ -12,6 +12,9 @@ config.read(os.path.join(path, "config"))
 # your hashtag or search query and tweet language (empty = all languages)
 hashtag = config.get("settings", "search_query")
 
+# if you would like to automatically follow those who use the hashtag
+auto_follow = config.getboolean("settings", "auto_follow")
+
 # Number retweets per time
 num = int(config.get("settings","max_num_retweets"))
 
@@ -58,7 +61,7 @@ except IndexError:
 #timeline = filter(lambda status: status.text[0] = "@", timeline)   - uncomment to remove all tweets with an @mention
 timeline = filter(lambda status: not any(word in status.text.split() for word in wordBlacklist), timeline)
 timeline = filter(lambda status: status.author.screen_name not in userBlacklist, timeline)
-timeline = filter(lambda status: status.author.id in friends, timeline)
+# timeline = filter(lambda status: status.author.id in friends, timeline)
 timeline = list(timeline)
 timeline.reverse()
 
@@ -74,6 +77,20 @@ for status in timeline:
                "message": status.text.encode('utf-8')})
 
         # api.retweet(status.id)
+
+        if auto_follow and status.author.id not in friends:
+
+            try:
+                print("Auto-followiing: %(name)s" % \
+                  {"name": status.author.screen_name.encode('utf-8')})
+                # api.create_friendship(status.author)
+            except tweepy.error.TweepError as e:
+                print("Unable to follow " + status.author.id)
+                print(e)
+                err_counter += 1
+
+            friends.append(status.author.id)
+
         tw_counter += 1
     except tweepy.error.TweepError as e:
         # just in case tweet got deleted in the meantime or already retweeted
