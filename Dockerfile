@@ -22,4 +22,4 @@ WORKDIR /app
 RUN mkdir store
 ENTRYPOINT ["bash","./start.sh"]
 
-# CMD [ "python", "./app/retweet.py" ]
+CMD [ "python", "retweet.py" ]

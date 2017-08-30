@@ -5,5 +5,5 @@ services:
     build: .
     image: retweet-bot
     privileged: true
-    # volumes: #uncomment to debug
-      # - .:/app
+    # volumes: #uncomment to these lines to debug
+    #   - .:/app
