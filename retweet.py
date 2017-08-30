@@ -32,7 +32,7 @@ friends = []
 hashedHashtag = hashlib.md5(hashtag.encode('ascii')).hexdigest()
 last_id_filename = "last_id_hashtag_%s" % hashedHashtag
 rt_bot_path = os.path.dirname(os.path.abspath(__file__))
-last_id_file = os.path.join(rt_bot_path, last_id_filename)
+last_id_file = os.path.join(rt_bot_path + "/store", last_id_filename)
 
 # create bot
 auth = tweepy.OAuthHandler(config.get("twitter", "consumer_key"), config.get("twitter", "consumer_secret"))

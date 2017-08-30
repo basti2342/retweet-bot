@@ -4,5 +4,6 @@ services:
   bot:
     build: .
     image: retweet-bot
-    volumes:
-      - .:/app
+    privileged: true
+    # volumes: #uncomment to debug
+      # - .:/app
