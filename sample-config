@@ -1,0 +1,25 @@
+[twitter]
+# log into your acccount and create an app at apps.twitter.com
+consumer_key =
+consumer_secret =
+access_token =
+access_token_secret =
+
+[settings]
+# tweets that match this search will be retweeted
+search_query = #OAKEDU
+
+# max number of tweets to be retweeted each time the script runs
+max_num_retweets = 20
+
+# twitter handle of your retweet bot (used to check friendships)
+retweet_account = oakeduretweets
+
+# if yes, only people you follow will be retweeted
+only_retweet_friends = yes
+
+# if yes, bot will automatically follow someone in addition to retweeting
+auto_follow = no
+
+# how often the bot will run
+run_frequency_in_minutes = 1
