@@ -94,17 +94,16 @@ def retweet_bot():
                   {"date": status.created_at,
                    "name": status.author.screen_name.encode('utf-8'),
                    "message": status.text.encode('utf-8')})
-
-            # api.retweet(status.id)
+            api.retweet(status.id)
 
             if auto_follow and status.author.id not in friends:
 
                 try:
                     print("Auto-followiing: %(name)s" % \
                       {"name": status.author.screen_name.encode('utf-8')})
-                    # api.create_friendship(status.author)
+                    api.create_friendship(status.author.id)
                 except tweepy.error.TweepError as e:
-                    print("Unable to follow " + status.author.id)
+                    print("Unable to follow " + status.author.screen_name.encode('utf-8'))
                     print(e)
                     err_counter += 1
 
@@ -125,6 +124,7 @@ def retweet_bot():
 
 schedule.every(frequency).minutes.do(retweet_bot)
 schedule.every(2).minutes.do(refresh_friends)
+retweet_bot()
 
 while True:
     schedule.run_pending()
