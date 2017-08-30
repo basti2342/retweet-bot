@@ -1,4 +1,4 @@
-GOOGLE_STORAGE_BUCKET=pvsketch-145416.appspot.com
+GOOGLE_STORAGE_BUCKET=
 
 gcsfuse $GOOGLE_STORAGE_BUCKET /app/store
 
