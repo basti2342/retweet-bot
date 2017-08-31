@@ -26,7 +26,7 @@ Setup:
 Docker containers are meant to be stateless, so any files saved will be lost when the container stops running. To store the savepoint file, the docker container uses [gcsfuse](https://github.com/GoogleCloudPlatform/gcsfuse) to mount a Google Cloud Storage bucket and saves the file there. GCS was chosen because it has an [always free tier](https://cloud.google.com/free/docs/always-free-usage-limits).
 1. Create a Google Cloud account. Under storage, create a regional bucket (free).
 2. In `start.sh`, put your bucket name
-3. [Create and download a service account JSON google key](https://cloud.google.com/storage/docs/authentication#generating-a-private-key). This gives the bot access to your bucket. May now be required if you're running docker on a Google Compute Engine instance.
+3. [Create and download a service account JSON google key](https://cloud.google.com/storage/docs/authentication#generating-a-private-key). This gives the bot access to your bucket. (This may not be required if you're running docker on a Google Compute Engine instance.)
 4. Put the key in the same folder as `retweet.py` and rename it to `google-key.json`
 
 #### Run docker container
