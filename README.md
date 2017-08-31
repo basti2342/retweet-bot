@@ -32,6 +32,6 @@ Docker containers are meant to be stateless, so any files saved will be lost whe
 #### Run docker container
 1. [Get Docker](https://www.docker.com/)
 2. `docker-compose up`
-3. `docker run -it bot`
+3. `docker-compose run bot`
 
 
