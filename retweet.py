@@ -64,9 +64,12 @@ def retweet_bot():
 
     # put everything into a list to be able to sort/filter
     timeline = []
-    for status in timelineIterator:
-        timeline.append(status)
 
+    try:
+        for status in timelineIterator:
+            timeline.append(status)
+    except TweepError as e:
+        time.sleep(20)
 
     try:
         last_tweet_id = timeline[0].id
@@ -123,7 +126,7 @@ def retweet_bot():
         file.write(str(last_tweet_id))
 
 schedule.every(frequency).minutes.do(retweet_bot)
-schedule.every(2).minutes.do(refresh_friends)
+schedule.every(3).minutes.do(refresh_friends)
 retweet_bot()
 
 while True:
