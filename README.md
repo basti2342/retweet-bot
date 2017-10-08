@@ -34,4 +34,10 @@ Docker containers are meant to be stateless, so any files saved will be lost whe
 2. `docker-compose up`
 3. `docker-compose run bot`
 
-
+### Setting Up PagerDuty (optional)
+You can use PagerDuty to get alerted when common errors happen. To do this, generate a v2 API key and put it in the config file using this format. On a PD service, create an integration key that uses the Events API v2 and put that in the file as well.
+```
+[pagerduty]
+api_key = 
+integration_key = 
+```
