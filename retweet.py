@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, configparser, tweepy, inspect, hashlib, schedule, time
+import os, configparser, tweepy, inspect, hashlib, schedule, time, pypd
 
 path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 
@@ -22,6 +22,15 @@ frequency = auto_follow = config.getint("settings", "run_frequency_in_minutes")
 
 # Number retweets per time
 num = int(config.get("settings","max_num_retweets"))
+
+# set pagerduty API key
+using_pd = False
+try:
+    pypd.api_key = config.get("pagerduty", "api_key")
+    integration_key = config.get("pagerduty", "integration_key")
+    using_pd = True
+except:
+    pass
 
 # blacklisted users and words
 userBlacklist = []
@@ -64,9 +73,23 @@ def retweet_bot():
 
     # put everything into a list to be able to sort/filter
     timeline = []
-    for status in timelineIterator:
-        timeline.append(status)
 
+    try:
+        for status in timelineIterator:
+            timeline.append(status)
+    except TweepError as e:
+        print('Tweepy Error caught on timelineIterator: ' + str(e))
+        if using_pd:
+            pypd.EventV2.create(data={
+                'routing_key': integration_key,
+                'event_action': 'trigger',
+                'payload': {
+                    'summary': 'Tweepy Error caught on timelineIterator: ' + str(e),
+                    'severity': 'error',
+                    'source': 'Python Retweet Bot',
+                }
+            })
+        time.sleep(20)
 
     try:
         last_tweet_id = timeline[0].id
@@ -123,7 +146,7 @@ def retweet_bot():
         file.write(str(last_tweet_id))
 
 schedule.every(frequency).minutes.do(retweet_bot)
-schedule.every(2).minutes.do(refresh_friends)
+schedule.every(3).minutes.do(refresh_friends)
 retweet_bot()
 
 while True:
