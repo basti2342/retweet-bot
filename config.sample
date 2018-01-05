@@ -1,7 +1,8 @@
 [settings]
-search_query:#yourHashtag
+search_query:
 # Leave empty for all languages
 tweet_language:
+number_of_rt:
 
 # Create your app on http://apps.twitter.com
 [twitter]
