@@ -1,0 +1,12 @@
+[settings]
+search_query:
+# Leave empty for all languages
+tweet_language:
+number_of_rt:
+
+# Create your app on http://apps.twitter.com
+[twitter]
+consumer_key:
+consumer_secret:
+access_token:
+access_token_secret:
