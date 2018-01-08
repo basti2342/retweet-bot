@@ -1,0 +1,26 @@
+{
+    "twitter_keys": {
+        "consumer_key": "",
+        "consumer_secret": "",
+        "access_token": "",
+        "access_token_secret": ""
+    },
+    "query_objects": [{
+        "search_query": "#test1",
+        "tweet_language": "es",
+        "tweet_limit": 5,
+        "follow_poster": true,
+        "user_blacklist": [ "", ""],
+        "word_blacklist": ["RT", "♺"],
+        "day_to_tweet": 1
+    },
+    {
+        "search_query": "#test2",
+        "tweet_language": "en",
+        "tweet_limit": 10,
+        "follow_poster": false,
+        "user_blacklist": [ "", ""],
+        "word_blacklist": ["RT", "♺"],
+        "day_to_tweet": 1
+    }]
+}

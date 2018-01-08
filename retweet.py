@@ -2,101 +2,130 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import configparser
 import hashlib
 import inspect
+import json
 import os
 
 import tweepy
 
+
+def get_hashtag_file_id(hashtag):
+    """Gets the file id of the passed hashtag"""
+
+    hashed_hashtag = hashlib.md5(hashtag.encode('ascii')).hexdigest()
+    last_id_filename = "last_id_hashtag_%s" % hashed_hashtag
+    rt_bot_path = os.path.dirname(os.path.abspath(__file__))
+    last_id_file = os.path.join(rt_bot_path, last_id_filename)
+
+    return last_id_file
+
+
+def get_hashtag_savepoint(hashtag):
+    """Gets the last retweet id of the passed hashtag if it exists"""
+
+    try:
+        with open(get_hashtag_file_id(hashtag), "r") as file:
+            savepoint = file.read()
+    except IOError:
+        savepoint = ""
+        logging.warning("No savepoint found. Bot is now searching for results")
+
+    return savepoint
+
+
+def retweet_logic(api, query_objects):
+    """Performs the logic surrounding retweeting the query objects defined in the config file"""
+
+    for query_object in query_objects:
+        savepoint = get_hashtag_savepoint(query_object['search_query'])
+        timeline_iterator = tweepy.Cursor(api.search, q=query_object['search_query'], since_id=savepoint,
+                                          lang=query_object['tweet_language']).items(query_object['tweet_limit'])
+
+        timeline = []
+        for status in timeline_iterator:
+            timeline.append(status)
+
+        try:
+            last_tweet_id = timeline[0].id
+        except IndexError:
+            last_tweet_id = savepoint
+
+        # FIX ME
+        # uncomment to remove all tweets with an @mention
+        # timeline = filter(lambda status: status.text[0] = "@", timeline)
+
+        timeline = filter(lambda status: not any(word in status.text.split()
+                                                 for word in query_object['word_blacklist']), timeline)
+        timeline = filter(
+            lambda status: status.author.screen_name not in query_object['user_blacklist'], timeline)
+        timeline = list(timeline)
+        timeline.reverse()
+
+        tweet_count = 0
+        followed_count = 0
+        err_count = 0
+
+        for status in timeline:
+            try:
+                print("(%(date)s) %(name)s: %(message)s\n" %
+                      {"date": status.created_at,
+                       "name": status.author.screen_name.encode('utf-8'),
+                       "message": status.text.encode('utf-8')})
+
+                API.retweet(status.id)
+                tweet_count += 1
+
+                if query_object['follow_poster'] is True:
+                    API.create_friendship(status.author.id)
+                    followed_count += 1
+
+            except tweepy.error.TweepError as err:
+                err_count += 1
+                logging.error(err)
+                continue
+
+        print("Finished. %d retweeted, %d followed, %d errors." %
+              (tweet_count, followed_count, err_count))
+
+        with open(get_hashtag_file_id(query_object['search_query']), "w") as file:
+            file.write(str(last_tweet_id))
+
+
+def api_login(twitter_keys):
+    """Logins to the Twitter API using the consumer and access tokens provided in the config file"""
+
+    auth = tweepy.OAuthHandler(
+        twitter_keys['consumer_key'], twitter_keys['consumer_secret'])
+    auth.set_access_token(
+        twitter_keys['access_token'], twitter_keys['access_token_secret'])
+    return tweepy.API(auth)
+
+
+class Config():
+    """Attempts to load and set the defined configuration"""
+
+    twitter_keys = {}
+    query_objects = {}
+
+    def __init__(self):
+        try:
+            path = os.path.dirname(os.path.abspath(
+                inspect.getfile(inspect.currentframe())))
+            with open(os.path.join(path, "config.json")) as json_data_file:
+                config_data = json.load(json_data_file)
+
+            self.twitter_keys = config_data['twitter_keys']
+            self.query_objects = config_data['query_objects']
+
+        except Exception as err:
+            logging.error("Failed to load config. Error: %s", err)
+
+
 if __name__ == '__main__':
     logging.debug("Bot started")
 
-    PATH = os.path.dirname(os.path.abspath(
-        inspect.getfile(inspect.currentframe())))
+    CONFIG = Config()
+    API = api_login(CONFIG.twitter_keys)
 
-    # read config
-    CONFIG = configparser.SafeConfigParser()
-    CONFIG.read(os.path.join(PATH, "config"))
-
-    # your hashtag or search query and tweet language (empty = all languages)
-    HASHTAG = CONFIG.get("settings", "search_query")
-    TWEET_LANG = CONFIG.get("settings", "tweet_language")
-
-    # Number retweets per time
-    RATE_LIMIT = int(CONFIG.get("settings", "number_of_rt"))
-
-    # blacklisted users and words
-    USER_BLACKLIST = []
-    WORD_BLACKLIST = ["RT", u"♺"]
-
-    # build savepoint path + file
-    HASHED_HASHTAG = hashlib.md5(HASHTAG.encode('ascii')).hexdigest()
-    LAST_FILENAME_ID = "last_id_hashtag_%s" % HASHED_HASHTAG
-    BOT_PATH = os.path.dirname(os.path.abspath(__file__))
-    LAST_FILE_ID = os.path.join(BOT_PATH, LAST_FILENAME_ID)
-
-    # create bot
-    AUTH = tweepy.OAuthHandler(CONFIG.get(
-        "twitter", "consumer_key"), CONFIG.get("twitter", "consumer_secret"))
-    AUTH.set_access_token(CONFIG.get("twitter", "access_token"),
-                          CONFIG.get("twitter", "access_token_secret"))
-    API = tweepy.API(AUTH)
-
-    # retrieve last savepoint if available
-    try:
-        with open(LAST_FILE_ID, "r") as file:
-            SAVEPOINT = file.read()
-    except IOError:
-        SAVEPOINT = ""
-        print ("No savepoint found. Bot is now searching for results")
-
-    # search query
-    TIMELINE_ITERATOR = tweepy.Cursor(
-        API.search, q=HASHTAG, since_id=SAVEPOINT, lang=TWEET_LANG).items(RATE_LIMIT)
-
-    # put everything into a list to be able to sort/filter
-    TIMELINE = []
-    for status in TIMELINE_ITERATOR:
-        TIMELINE.append(status)
-
-    try:
-        LAST_TWEET_ID = TIMELINE[0].id
-    except IndexError:
-        LAST_TWEET_ID = SAVEPOINT
-
-    # filter @replies/blacklisted words & users out and reverse timeline
-
-    # uncomment to remove all tweets with an @mention
-    # timeline = filter(lambda status: status.text[0] = "@", timeline)
-    TIMELINE = filter(lambda status: not any(word in status.text.split()
-                                             for word in WORD_BLACKLIST), TIMELINE)
-    TIMELINE = filter(
-        lambda status: status.author.screen_name not in USER_BLACKLIST, TIMELINE)
-    TIMELINE = list(TIMELINE)
-    TIMELINE.reverse()
-
-    TW_COUNT = 0
-    ERR_COUNT = 0
-
-    # Iterate the timeline and retweet
-    # In case tweet gets deleted in the meantime or already retweeted throw and print error
-    for status in TIMELINE:
-        try:
-            print("(%(date)s) %(name)s: %(message)s\n" %
-                  {"date": status.created_at,
-                   "name": status.author.screen_name.encode('utf-8'),
-                   "message": status.text.encode('utf-8')})
-
-            API.retweet(status.id)
-            TW_COUNT += 1
-        except tweepy.error.TweepError as err:
-            ERR_COUNT += 1
-            logging.error(err)
-            continue
-
-    print ("Finished. %d Tweets retweeted, %d errors occured." % (TW_COUNT, ERR_COUNT))
-
-    # write last retweeted tweet id to file
-    with open(LAST_FILE_ID, "w") as file:
-        file.write(str(LAST_TWEET_ID))
+    retweet_logic(API, CONFIG.query_objects)
