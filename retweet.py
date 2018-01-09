@@ -11,16 +11,23 @@ import os
 import tweepy
 
 
-def can_tweet(day_to_tweet):
-    """Checks the current day against the day tweets should be retweeted"""
+def filtered_tweet_check(tweet):
+    """Filters out retweets and @ mentions to avoid spam"""
 
-    if day_to_tweet == 7:
-        return True
-
-    if datetime.datetime.today().weekday() == day_to_tweet:
+    if not tweet.retweeted and '@' not in tweet.text:
         return True
 
     return False
+
+
+def can_tweet_today(day_to_tweet):
+    """Checks the current day against the day tweets should be retweeted"""
+
+    if datetime.datetime.today().weekday() == day_to_tweet or day_to_tweet == 7:
+        return True
+
+    return False
+
 
 def get_hashtag_file_id(hashtag):
     """Gets the file id of the passed hashtag"""
@@ -50,12 +57,12 @@ def retweet_logic(api, query_objects):
     """Performs the logic surrounding retweeting the query objects defined in the config file"""
 
     for query_object in query_objects:
-        if can_tweet(query_object['day_to_tweet']) is False:
+        if can_tweet_today(query_object['day_to_tweet']) is False:
             continue
 
         savepoint = get_hashtag_savepoint(query_object['search_query'])
         timeline_iterator = tweepy.Cursor(api.search, q=query_object['search_query'], since_id=savepoint,
-                                          lang=query_object['tweet_language']).items(query_object['tweet_limit'])
+                                          lang=query_object['tweet_language'], ).items(query_object['tweet_limit'])
 
         timeline = []
         for status in timeline_iterator:
@@ -65,10 +72,6 @@ def retweet_logic(api, query_objects):
             last_tweet_id = timeline[0].id
         except IndexError:
             last_tweet_id = savepoint
-
-        # FIX ME
-        # uncomment to remove all tweets with an @mention
-        # timeline = filter(lambda status: status.text[0] = "@", timeline)
 
         timeline = filter(lambda status: not any(word in status.text.split()
                                                  for word in query_object['word_blacklist']), timeline)
@@ -88,8 +91,12 @@ def retweet_logic(api, query_objects):
                        "name": status.author.screen_name.encode('utf-8'),
                        "message": status.text.encode('utf-8')})
 
-                API.retweet(status.id)
-                tweet_count += 1
+                if filtered_tweet_check(status) is True:
+                    API.retweet(status.id)               
+                    tweet_count += 1
+
+                    if query_object['favourite_tweets'] is True:
+                        API.create_favorite(status.id)
 
                 if query_object['follow_poster'] is True:
                     API.create_friendship(status.author.id)

@@ -12,7 +12,8 @@
         "follow_poster": true,
         "user_blacklist": [ "", ""],
         "word_blacklist": ["RT", "♺"],
-        "day_to_tweet": 1
+        "day_to_tweet": 1,
+        "favourite_tweets": false
     },
     {
         "search_query": "#test2",
@@ -21,6 +22,7 @@
         "follow_poster": false,
         "user_blacklist": [ "", ""],
         "word_blacklist": ["RT", "♺"],
-        "day_to_tweet": 1
+        "day_to_tweet": 1,
+        "favourite_tweets": false
     }]
 }
