@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import datetime
 import logging
 import hashlib
 import inspect
@@ -9,6 +10,17 @@ import os
 
 import tweepy
 
+
+def can_tweet(day_to_tweet):
+    """Checks the current day against the day tweets should be retweeted"""
+
+    if day_to_tweet == 7:
+        return True
+
+    if datetime.datetime.today().weekday() == day_to_tweet:
+        return True
+
+    return False
 
 def get_hashtag_file_id(hashtag):
     """Gets the file id of the passed hashtag"""
@@ -38,6 +50,9 @@ def retweet_logic(api, query_objects):
     """Performs the logic surrounding retweeting the query objects defined in the config file"""
 
     for query_object in query_objects:
+        if can_tweet(query_object['day_to_tweet']) is False:
+            continue
+
         savepoint = get_hashtag_savepoint(query_object['search_query'])
         timeline_iterator = tweepy.Cursor(api.search, q=query_object['search_query'], since_id=savepoint,
                                           lang=query_object['tweet_language']).items(query_object['tweet_limit'])

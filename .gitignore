@@ -106,4 +106,8 @@ venv.bak/
 # Config Files
 config.json
 
+#
+last_id_hashtag_*
+
+# VSCode
 **/.vscode/**
