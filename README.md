@@ -1,31 +1,38 @@
-Python Retweet Bot
+Retweet Bot
 ==================
 
-![alt text](https://img.shields.io/badge/python-3.5-green.svg "Python3.5")
+![alt text](https://img.shields.io/badge/python-3.6-green.svg "Python3.6")
 
-This script retweets all Tweets containing your search term. To limit Twitter requests a savepoint file marks Tweets found before. It's Twitter API v1.1 ready.
+This script retweets certain tweets with a specific search query and can use parameters defined in the config file to perform additional actions. To limit Twitter requests it uses a savepoint for each configured query objects, search query id and marks the last tweet it retweeted. 
 
-Dependecies:
+It's Twitter API v1.1 ready.
+
+Requirements:
 -------------
-* Tweepy
+You need Python 3.4 or later to run mypy. You can have multiple Python versions (2.x and 3.x) installed on the same system without problems.
 
-```pip install tweepy```
+To download Python 3.4 on Linux, OS X and Windows, packages are available at
 
-* Or alternatively
+  http://www.python.org/getit/
 
-```pip install -r requirements.txt```
+Dependencies:
+-------------
+Install the dependencies like this:
 
-How to start:
+   ```pip install -r requirements.txt```
+
+Quick start:
 -------------
 
-* Define your hashtag or search query in the config file
-* Define the number of Retweets at a time (This avoids overloading -Limit is 180 RT/ 15 mins)
-* Add your Twitter app credentials in the config file
-* (Tune some other options if you like)
+To start create a copy of ```config.SAMPLE.json``` and rename to ```config.json```, then follow the steps below.
+* In ```config.json``` define your ```query_objects``` in the config file. See https://git.io/vNqUv for an example
+* In ```config.json``` define your ```twitter_keys``` to the config file. Find these at https://apps.twitter.com/
+
+If Python is installed correctly and your ```config.json``` file is setup, you can run the bot by using: 
 * $ python retweet.py
-* Add this call to your crontab(unix)/task scheduler(windows) (or something similar) to retweet all new tweets regularly
+
 
 Compatibility
 -------------
 
-Compatible with Python 3.x ,tested  on Python 3.5.
+Compatible with Python 3.x, tested on Python 3.6.
