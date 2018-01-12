@@ -11,10 +11,10 @@ import os
 import tweepy
 
 
-def filtered_tweet_check(tweet):
+def filtered_tweet_check(tweet, list_of_previous_tweet_ids):
     """Filters out retweets and @ mentions to avoid spam"""
 
-    if not tweet.retweeted and '@' not in tweet.text:
+    if not tweet.retweeted and '@' not in tweet.text and tweet.id not in list_of_previous_tweet_ids:
         return True
 
     return False
@@ -56,6 +56,8 @@ def get_hashtag_savepoint(hashtag):
 def retweet_logic(api, query_objects):
     """Performs the logic surrounding retweeting the query objects defined in the config file"""
 
+    list_of_previous_tweet_ids = []
+
     for query_object in query_objects:
         if can_tweet_today(query_object['day_to_tweet']) is False:
             continue
@@ -86,13 +88,14 @@ def retweet_logic(api, query_objects):
 
         for status in timeline:
             try:
-                print("(%(date)s) %(name)s: %(message)s\n" %
-                      {"date": status.created_at,
-                       "name": status.author.screen_name.encode('utf-8'),
-                       "message": status.text.encode('utf-8')})
+                if filtered_tweet_check(status, list_of_previous_tweet_ids) is True:
+                    print("(%(date)s) %(name)s: %(message)s\n" %
+                          {"date": status.created_at,
+                           "name": status.author.screen_name.encode('utf-8'),
+                           "message": status.text.encode('utf-8')})
 
-                if filtered_tweet_check(status) is True:
-                    API.retweet(status.id)               
+                    API.retweet(status.id)
+                    list_of_previous_tweet_ids.append(status.id)
                     tweet_count += 1
 
                     if query_object['favourite_tweets'] is True:
