@@ -6,16 +6,24 @@ import logging
 import hashlib
 import inspect
 import json
+import re
 import os
 
 import tweepy
 
 
-def filtered_tweet_check(tweet, list_of_previous_tweet_ids):
-    """Filters out retweets and @ mentions to avoid spam"""
+def filtered_tweet_check(tweet, list_of_previous_tweet_ids, max_hashtags):
+    """Filters out retweets, hashtag spamming tweets and @ mentions"""
+
+    find_hashtag_regex = r"(?<=[\s>])#(\d*[A-Za-z_]+\d*)\b(?!;)"
 
     if not tweet.retweeted and '@' not in tweet.text and tweet.id not in list_of_previous_tweet_ids:
-        return True
+
+        hashtags_in_tweet = re.finditer(find_hashtag_regex, tweet.text, re.MULTILINE)
+        number_of_hashtags_in_tweet = len(list(hashtags_in_tweet))
+
+        if number_of_hashtags_in_tweet <= max_hashtags:
+            return True
 
     return False
 
@@ -88,7 +96,7 @@ def retweet_logic(api, query_objects):
 
         for status in timeline:
             try:
-                if filtered_tweet_check(status, list_of_previous_tweet_ids) is True:
+                if filtered_tweet_check(status, list_of_previous_tweet_ids, query_object['max_hashtags']) is True:
                     print("(%(date)s) %(name)s: %(message)s\n" %
                           {"date": status.created_at,
                            "name": status.author.screen_name.encode('utf-8'),
