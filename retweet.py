@@ -28,10 +28,10 @@ def filtered_tweet_check(tweet, list_of_previous_tweet_ids, max_hashtags):
     return False
 
 
-def can_tweet_today(day_to_tweet):
-    """Checks the current day against the day tweets should be retweeted"""
+def can_perform_action_today(day_to_complete_action):
+    """Checks the current day against the day actions should be performed"""
 
-    if datetime.datetime.today().weekday() == day_to_tweet or day_to_tweet == 7:
+    if datetime.datetime.today().weekday() == day_to_complete_action or day_to_complete_action == 7:
         return True
 
     return False
@@ -61,13 +61,46 @@ def get_hashtag_savepoint(hashtag):
     return savepoint
 
 
+def follower_management(api, config):
+    """Performs the logic surrounding maintaining active follower using the follower management settings defined in the config file"""
+
+    if config.follower_management['manage_followers']:
+        unfollowed_count = 0
+        err_count = 0
+
+        inactivityDate = datetime.date.today() - datetime.timedelta(days = config.follower_management['inactivity_period'])
+
+        followers = API.friends_ids(config.twitter_keys['screen_name'])
+        for follower in followers:
+            try:
+                if (unfollowed_count < config.follower_management['max_unfollows']):
+                    lastTweet = API.user_timeline(follower, count = 1)
+                    lastTweetDate = lastTweet[0].created_at.date()
+
+                    if lastTweetDate < inactivityDate:
+                        API.destroy_friendship(follower)
+                        unfollowed_count += 1
+                        continue
+
+            except (tweepy.error.TweepError, IndexError) as err:
+                err_count += 1
+                logging.error(err)   
+
+                if err.reason == "[{'message': 'Rate limit exceeded', 'code': 88}]":
+                    break 
+
+                continue
+
+        print("Finished. %d unfollowed, %d errors." % (unfollowed_count, err_count))    
+
+
 def retweet_logic(api, query_objects):
     """Performs the logic surrounding retweeting the query objects defined in the config file"""
 
     list_of_previous_tweet_ids = []
 
     for query_object in query_objects:
-        if can_tweet_today(query_object['day_to_tweet']) is False:
+        if can_perform_action_today(query_object['day_to_tweet']) is False:
             continue
 
         savepoint = get_hashtag_savepoint(query_object['search_query'])
@@ -139,6 +172,7 @@ class Config():
     """Attempts to load and set the defined configuration"""
 
     twitter_keys = {}
+    follower_management = {}
     query_objects = {}
 
     def __init__(self):
@@ -149,6 +183,7 @@ class Config():
                 config_data = json.load(json_data_file)
 
             self.twitter_keys = config_data['twitter_keys']
+            self.follower_management = config_data['follower_management']
             self.query_objects = config_data['query_objects']
 
         except Exception as err:
@@ -162,3 +197,5 @@ if __name__ == '__main__':
     API = api_login(CONFIG.twitter_keys)
 
     retweet_logic(API, CONFIG.query_objects)
+    follower_management(API, CONFIG)
+
