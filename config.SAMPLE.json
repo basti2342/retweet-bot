@@ -1,9 +1,16 @@
 {
     "twitter_keys": {
+        "screen_name": "DevMicrocosm",
         "consumer_key": "",
         "consumer_secret": "",
         "access_token": "",
         "access_token_secret": ""
+    },
+    "follower_management": {
+        "manage_followers": true,
+        "day_to_manage": 0,
+        "inactivity_period": 14,
+        "max_unfollows": 300
     },
     "query_objects": [{
         "search_query": "#test1",
