@@ -1,16 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# Retweet Bot core module
 
-import datetime
-import logging
+import common_methods
 import hashlib
-import inspect
-import json
+import logging
+import tweepy
 import re
 import os
-
-import tweepy
-
 
 def filtered_tweet_check(tweet, list_of_previous_tweet_ids, max_hashtags):
     """Filters out retweets, hashtag spamming tweets and @ mentions"""
@@ -28,22 +23,12 @@ def filtered_tweet_check(tweet, list_of_previous_tweet_ids, max_hashtags):
     return False
 
 
-def can_perform_action_today(day_to_complete_action):
-    """Checks the current day against the day actions should be performed"""
-
-    if datetime.datetime.today().weekday() == day_to_complete_action or day_to_complete_action == 7:
-        return True
-
-    return False
-
-
 def get_hashtag_file_id(hashtag):
     """Gets the file id of the passed hashtag"""
 
     hashed_hashtag = hashlib.md5(hashtag.encode('ascii')).hexdigest()
     last_id_filename = "last_id_hashtag_%s" % hashed_hashtag
-    rt_bot_path = os.path.dirname(os.path.abspath(__file__))
-    last_id_file = os.path.join(rt_bot_path, last_id_filename)
+    last_id_file = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'hashes', last_id_filename))
 
     return last_id_file
 
@@ -60,47 +45,13 @@ def get_hashtag_savepoint(hashtag):
 
     return savepoint
 
-
-def follower_management(api, config):
-    """Performs the logic surrounding maintaining active follower using the follower management settings defined in the config file"""
-
-    if config.follower_management['manage_followers'] and can_perform_action_today(config.follower_management['day_to_manage']) is True:
-        unfollowed_count = 0
-        err_count = 0
-
-        inactivityDate = datetime.date.today() - datetime.timedelta(days = config.follower_management['inactivity_period'])
-
-        followers = API.friends_ids(config.twitter_keys['screen_name'])
-        for follower in followers:
-            try:
-                if (unfollowed_count < config.follower_management['max_unfollows']):
-                    lastTweet = API.user_timeline(follower, count = 1)
-                    lastTweetDate = lastTweet[0].created_at.date()
-
-                    if lastTweetDate < inactivityDate:
-                        API.destroy_friendship(follower)
-                        unfollowed_count += 1
-                        continue
-
-            except (tweepy.error.TweepError, IndexError) as err:
-                err_count += 1
-                logging.error(err)   
-
-                if err.reason == "[{'message': 'Rate limit exceeded', 'code': 88}]":
-                    break 
-
-                continue
-
-        print("Finished. %d unfollowed, %d errors." % (unfollowed_count, err_count))    
-
-
-def retweet_logic(api, query_objects):
+def retweet(api, query_objects):
     """Performs the logic surrounding retweeting the query objects defined in the config file"""
 
     list_of_previous_tweet_ids = []
 
     for query_object in query_objects:
-        if can_perform_action_today(query_object['day_to_tweet']) is False:
+        if common_methods.can_perform_action_today(query_object['day_to_tweet']) is False:
             continue
 
         savepoint = get_hashtag_savepoint(query_object['search_query'])
@@ -135,15 +86,15 @@ def retweet_logic(api, query_objects):
                            "name": status.author.screen_name.encode('utf-8'),
                            "message": status.text.encode('utf-8')})
 
-                    API.retweet(status.id)
+                    api.retweet(status.id)
                     list_of_previous_tweet_ids.append(status.id)
                     tweet_count += 1
 
                     if query_object['favourite_tweets'] is True:
-                        API.create_favorite(status.id)
+                        api.create_favorite(status.id)
 
                 if query_object['follow_poster'] is True:
-                    API.create_friendship(status.author.id)
+                    api.create_friendship(status.author.id)
                     followed_count += 1
 
             except tweepy.error.TweepError as err:
@@ -166,36 +117,3 @@ def api_login(twitter_keys):
     auth.set_access_token(
         twitter_keys['access_token'], twitter_keys['access_token_secret'])
     return tweepy.API(auth)
-
-
-class Config():
-    """Attempts to load and set the defined configuration"""
-
-    twitter_keys = {}
-    follower_management = {}
-    query_objects = {}
-
-    def __init__(self):
-        try:
-            path = os.path.dirname(os.path.abspath(
-                inspect.getfile(inspect.currentframe())))
-            with open(os.path.join(path, "config.json")) as json_data_file:
-                config_data = json.load(json_data_file)
-
-            self.twitter_keys = config_data['twitter_keys']
-            self.follower_management = config_data['follower_management']
-            self.query_objects = config_data['query_objects']
-
-        except Exception as err:
-            logging.error("Failed to load config. Error: %s", err)
-
-
-if __name__ == '__main__':
-    logging.debug("Bot started")
-
-    CONFIG = Config()
-    API = api_login(CONFIG.twitter_keys)
-
-    retweet_logic(API, CONFIG.query_objects)
-    follower_management(API, CONFIG)
-
