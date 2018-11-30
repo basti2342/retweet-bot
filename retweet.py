@@ -64,7 +64,7 @@ def get_hashtag_savepoint(hashtag):
 def follower_management(api, config):
     """Performs the logic surrounding maintaining active follower using the follower management settings defined in the config file"""
 
-    if config.follower_management['manage_followers']:
+    if config.follower_management['manage_followers'] and can_perform_action_today(config.follower_management['day_to_manage']) is True:
         unfollowed_count = 0
         err_count = 0
 
