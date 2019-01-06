@@ -51,7 +51,7 @@ def retweet(api, query_objects):
     list_of_previous_tweet_ids = []
 
     for query_object in query_objects:
-        if common_methods.can_perform_action_today(query_object['day_to_tweet']) is False:
+        if common_methods.can_perform_action_today(query_object['days_to_tweet']) is False:
             continue
 
         savepoint = get_hashtag_savepoint(query_object['search_query'])

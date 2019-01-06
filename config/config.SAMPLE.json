@@ -8,7 +8,7 @@
     },
     "follower_management": {
         "manage_followers": true,
-        "day_to_manage": 0,
+        "days_to_manage": [0],
         "inactivity_period": 14,
         "max_unfollows": 300
     },
@@ -17,9 +17,9 @@
         "tweet_language": "es",
         "tweet_limit": 5,
         "follow_poster": true,
-        "user_blacklist": [ "", ""],
+        "user_blacklist": ["", ""],
         "word_blacklist": ["RT", "♺"],
-        "day_to_tweet": 1,
+        "days_to_tweet": [1],
         "favourite_tweets": false,
         "max_hashtags": 4
     },
@@ -28,9 +28,9 @@
         "tweet_language": "en",
         "tweet_limit": 10,
         "follow_poster": false,
-        "user_blacklist": [ "", ""],
+        "user_blacklist": ["", ""],
         "word_blacklist": ["RT", "♺"],
-        "day_to_tweet": 1,
+        "days_to_tweet": [2, 4],
         "favourite_tweets": false,
         "max_hashtags": 4
     }]

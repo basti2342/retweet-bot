@@ -9,7 +9,7 @@ import tweepy
 def manage_followers(api, config):
     """Performs the logic surrounding maintaining active follower using the follower management settings defined in the config file"""
 
-    if config.follower_management['manage_followers'] and common_methods.can_perform_action_today(config.follower_management['day_to_manage']) is True:
+    if config.follower_management['manage_followers'] and common_methods.can_perform_action_today(config.follower_management['days_to_manage']) is True:
         unfollowed_count = 0
         err_count = 0
 
