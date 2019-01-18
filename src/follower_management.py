@@ -31,8 +31,9 @@ def manage_followers(api, config):
                 err_count += 1
                 logging.error(err)   
 
-                if err.reason == "[{'message': 'Rate limit exceeded', 'code': 88}]":
-                    break 
+                if (hasattr(err, 'reason')):
+                    if err.reason == "[{'message': 'Rate limit exceeded', 'code': 88}]":
+                        break 
 
                 continue
 

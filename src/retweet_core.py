@@ -10,14 +10,14 @@ import os
 def filtered_tweet_check(tweet, list_of_previous_tweet_ids, max_hashtags):
     """Filters out retweets, hashtag spamming tweets and @ mentions"""
 
-    find_hashtag_regex = r"(?<=[\s>])#(\d*[A-Za-z_]+\d*)\b(?!;)"
+    find_hashtag_regex = r"(^|\B)#(?![0-9_]+\b)([a-zA-Z0-9_]{1,30})(\b|\r)"
 
     if not tweet.retweeted and '@' not in tweet.text and tweet.id not in list_of_previous_tweet_ids:
 
         hashtags_in_tweet = re.finditer(find_hashtag_regex, tweet.text, re.MULTILINE)
         number_of_hashtags_in_tweet = len(list(hashtags_in_tweet))
 
-        if number_of_hashtags_in_tweet <= max_hashtags:
+        if number_of_hashtags_in_tweet < max_hashtags:
             return True
 
     return False
