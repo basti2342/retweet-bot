@@ -8,6 +8,7 @@
     },
     "follower_management": {
         "manage_followers": true,
+        "aggressive_management": false,
         "days_to_manage": [0],
         "inactivity_period": 14,
         "max_unfollows": 300
