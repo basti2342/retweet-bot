@@ -22,7 +22,8 @@
         "word_blacklist": ["RT", "♺"],
         "days_to_tweet": [1],
         "favourite_tweets": false,
-        "max_hashtags": 4
+        "max_hashtags": 4,
+        "max_urls": 0
     },
     {
         "search_query": "#test2",
@@ -33,6 +34,7 @@
         "word_blacklist": ["RT", "♺"],
         "days_to_tweet": [2, 4],
         "favourite_tweets": false,
-        "max_hashtags": 4
+        "max_hashtags": 4,
+        "max_urls": 0
     }]
 }
