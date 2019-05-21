@@ -25,7 +25,7 @@ Quick start:
 -------------
 
 To start create a copy of ```config.SAMPLE.json``` and rename to ```config.json```, then follow the steps below.
-* In ```config.json``` define your ```query_objects``` in the config file. See https://git.io/vNqUv for an example
+* In ```config.json``` define your ```query_objects``` in the config file. See https://git.io/fjsGR for an example
 * In ```config.json``` define your ```twitter_keys``` to the config file. Find these at https://apps.twitter.com/
 
 If Python is installed correctly and your ```config.json``` file is setup, you can run the bot by using: 
