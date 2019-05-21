@@ -32,6 +32,21 @@ If Python is installed correctly and your ```config.json``` file is setup, you c
 * $ python retweet.py
 
 
+Use as cron job
+---------------
+
+create file at 
+
+```/etc/cron.d/retweet-bot```
+
+with the contents
+
+```
+30 * * * * [your-user-here] cd ~/retweet-bot/src/ && python3 main.py >> ~/retweet-bot/twitter_bot.txt
+```
+
+please use https://crontab.guru for more info on how to set time for cron jobs.
+
 Compatibility
 -------------
 
