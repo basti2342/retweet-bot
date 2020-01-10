@@ -9,7 +9,9 @@ import tweepy
 def manage_followers(api, config):
     """Performs the logic surrounding maintaining active follower using the follower management settings defined in the config file"""
 
-    if config.follower_management['manage_followers'] and common_methods.can_perform_action_today(config.follower_management['days_to_manage']) is True:
+    if (config.follower_management['manage_followers'] and
+        common_methods.can_perform_action_today(config.follower_management['days_to_manage']) is True and
+        common_methods.can_perform_action_this_month(config.follower_management['months_to_manage']) is True):
         
         if config.follower_management['aggressive_management'] is True:
             aggressive_management(api, config)

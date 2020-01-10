@@ -7,27 +7,37 @@ import tweepy
 import re
 import os
 
-def filtered_tweet_check(tweet, list_of_previous_tweet_ids, max_hashtags, max_urls):
+def filtered_tweet_check(tweet, list_of_previous_tweet_ids, max_hashtags, max_urls, filter_mentions):
     """Filters out retweets, hashtag spamming tweets and @ mentions"""
 
-    find_hashtag_regex = r"(^|\B)#(?![0-9_]+\b)([a-zA-Z0-9_]{1,30})(\b|\r)"
-    find_url_regex = r"""(?:(?:https?|ftp):\/\/|\b(?:[a-z\d]+\.))(?:(?:[^\s()<>]+|\((?:[^\s()<>]+|(?:\([^\s()<>]+\)))?\))+(?:\((?:[^\s()<>]+|(?:\(?:[^\s()<>]+\)))?\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))?"""
+    find_hashtag_regex = r"#[a-z0-9_]+"
+    find_url_regex = r"[localhost|http|https|ftp|file]+://[\w\S(\.|:|/)]+"
 
-    if not tweet.retweeted and '@' not in tweet.text and tweet.id not in list_of_previous_tweet_ids:
+    if not tweet.retweeted and tweet.id not in list_of_previous_tweet_ids:
+
+        if filter_mentions and '@' in tweet.text:
+            return False
 
         hashtags_in_tweet = re.finditer(find_hashtag_regex, tweet.text, re.MULTILINE)
         number_of_hashtags_in_tweet = len(list(hashtags_in_tweet))
 
-        if number_of_hashtags_in_tweet < max_hashtags:
-            return True
+        if number_of_hashtags_in_tweet >= max_hashtags:
+            return False
 
         urls_in_tweet = re.finditer(find_url_regex, tweet.text, re.MULTILINE)
         number_of_urls_in_tweet = len(list(urls_in_tweet))
 
-        if number_of_urls_in_tweet < max_urls:
-            return True
+        if number_of_urls_in_tweet >= max_urls:
+            return False
 
-    return False
+    return True
+
+
+def create_hashes_folder():
+    """Checks if the hashes directory exists, if not create it"""
+
+    if not os.path.exists('hashes'):
+        os.makedirs('hashes')
 
 
 def get_hashtag_file_id(hashtag):
@@ -58,6 +68,9 @@ def retweet(api, query_objects):
     list_of_previous_tweet_ids = []
 
     for query_object in query_objects:
+        if common_methods.can_perform_action_this_month(query_object['months_to_tweet']) is False:
+            continue
+
         if common_methods.can_perform_action_today(query_object['days_to_tweet']) is False:
             continue
 
@@ -87,7 +100,7 @@ def retweet(api, query_objects):
 
         for status in timeline:
             try:
-                if filtered_tweet_check(status, list_of_previous_tweet_ids, query_object['max_hashtags'], query_object['max_urls']) is True:
+                if filtered_tweet_check(status, list_of_previous_tweet_ids, query_object['max_hashtags'], query_object['max_urls'], query_object['filter_mentions']) is True:
                     print("(%(date)s) %(name)s: %(message)s\n" %
                           {"date": status.created_at,
                            "name": status.author.screen_name.encode('utf-8'),

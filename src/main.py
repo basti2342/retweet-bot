@@ -14,5 +14,6 @@ if __name__ == '__main__':
     CONFIG = config.Config()
     API = retweet_core.api_login(CONFIG.twitter_keys)
 
+    retweet_core.create_hashes_folder()
     retweet_core.retweet(API, CONFIG.query_objects)
     follower_management.manage_followers(API, CONFIG)

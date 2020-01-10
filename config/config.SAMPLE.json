@@ -10,6 +10,7 @@
         "manage_followers": true,
         "aggressive_management": false,
         "days_to_manage": [0],
+        "months_to_manage": [13],
         "inactivity_period": 14,
         "max_unfollows": 300
     },
@@ -21,9 +22,11 @@
         "user_blacklist": ["", ""],
         "word_blacklist": ["RT", "♺"],
         "days_to_tweet": [1],
+        "months_to_tweet": [1, 4, 10],
         "favourite_tweets": false,
         "max_hashtags": 4,
-        "max_urls": 0
+        "max_urls": 0,
+        "filter_mentions": true
     },
     {
         "search_query": "#test2",
@@ -33,8 +36,10 @@
         "user_blacklist": ["", ""],
         "word_blacklist": ["RT", "♺"],
         "days_to_tweet": [2, 4],
+        "months_to_tweet": [13],
         "favourite_tweets": false,
         "max_hashtags": 4,
-        "max_urls": 0
+        "max_urls": 0,
+        "filter_mentions": true
     }]
 }
