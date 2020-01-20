@@ -26,7 +26,8 @@
         "favourite_tweets": false,
         "max_hashtags": 4,
         "max_urls": 0,
-        "filter_mentions": true
+        "filter_mentions": true,
+        "filter_media": true
     },
     {
         "search_query": "#test2",
@@ -40,6 +41,7 @@
         "favourite_tweets": false,
         "max_hashtags": 4,
         "max_urls": 0,
-        "filter_mentions": true
+        "filter_mentions": true,
+        "filter_media": true
     }]
 }
