@@ -1,9 +1,0 @@
-version: '2'
-
-services:
-  bot:
-    build: .
-    image: retweet-bot
-    privileged: true
-    # volumes: #uncomment to these lines to debug
-    #   - .:/app

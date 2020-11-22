@@ -1,7 +1,6 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, configparser, tweepy, inspect, hashlib, schedule, time, pypd
+import os, configparser, tweepy, inspect, hashlib, time
 
 path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 
@@ -17,8 +16,6 @@ auto_follow = config.getboolean("settings", "auto_follow")
 
 # if you would only like to retweet people you follow (overrides auto-follow)
 only_retweet_friends = config.getboolean("settings", "only_retweet_friends")
-
-frequency = auto_follow = config.getint("settings", "run_frequency_in_minutes")
 
 # Number retweets per time
 num = int(config.get("settings","max_num_retweets"))
@@ -38,10 +35,11 @@ wordBlacklist = ["RT", u"♺"]
 friends = []
 
 # build savepoint path + file
+# os.chdir('/tmp')
 hashedHashtag = hashlib.md5(hashtag.encode('ascii')).hexdigest()
 last_id_filename = "last_id_hashtag_%s" % hashedHashtag
 rt_bot_path = os.path.dirname(os.path.abspath(__file__))
-last_id_file = os.path.join(rt_bot_path + "/store", last_id_filename)
+last_id_file = os.path.join("/tmp", last_id_filename)
 
 # create bot
 auth = tweepy.OAuthHandler(config.get("twitter", "consumer_key"), config.get("twitter", "consumer_secret"))
@@ -64,7 +62,7 @@ def retweet_bot():
     try:
         with open(last_id_file, "r") as file:
             savepoint = file.read()
-    except IOError:
+    except:
         savepoint = ""
         print("No savepoint found. Bot is now searching for results")
 
@@ -122,7 +120,7 @@ def retweet_bot():
             if auto_follow and status.author.id not in friends:
 
                 try:
-                    print("Auto-followiing: %(name)s" % \
+                    print("Auto-following: %(name)s" % \
                       {"name": status.author.screen_name.encode('utf-8')})
                     api.create_friendship(status.author.id)
                 except tweepy.error.TweepError as e:
@@ -136,7 +134,7 @@ def retweet_bot():
         except tweepy.error.TweepError as e:
             # just in case tweet got deleted in the meantime or already retweeted
             err_counter += 1
-            # print e
+            print(e)
             continue
 
     print("Finished. %d Tweets retweeted, %d errors occured." % (tw_counter, err_counter))
@@ -145,10 +143,7 @@ def retweet_bot():
     with open(last_id_file, "w") as file:
         file.write(str(last_tweet_id))
 
-schedule.every(frequency).minutes.do(retweet_bot)
-schedule.every(3).minutes.do(refresh_friends)
-retweet_bot()
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+
+def handler(event, context):
+    retweet_bot()
