@@ -1,34 +1,51 @@
-# Retweet Bot filtering module which handles filtering timeline and statuses based on query_objects
+"""Retweet Bot filtering module which handles filtering timeline and tweets"""
+
+import logging
+from better_profanity import profanity
+
+profanity.load_censor_words()
 
 
-def filter_status(tweet, list_of_previous_tweet_ids, max_hashtags, max_urls, filter_mentions, filter_media):
+def filter_status(tweet, query_object):
     """Performs filtering logic on each tweet being processed"""
+    filtered_out = []
 
-    if not tweet.retweeted or tweet.id not in list_of_previous_tweet_ids:
+    if not tweet.retweeted:
+        if query_object['filter_profanity'] and profanity.contains_profanity(tweet.text):
+            filtered_out.append('profanity')
 
-        if filter_media and tweet.entities['media'] is not None:
-            return False
+        if query_object['filter_media'] and tweet.entities['media'] is not None:
+            filtered_out.append('contains media')
 
-        if filter_mentions and len(tweet.entities['user_mentions']) > 0:
-            return False
-            
-        if max_hashtags < len(tweet.entities['hashtags']):
-            return False
+        if query_object['require_media'] and 'media' in tweet.entities and tweet.entities['media'][0] is None:
+            filtered_out.append('no media')
 
-        if max_urls < len(tweet.entities['urls']):
-            return False
+        if query_object['filter_mentions'] and len(tweet.entities['user_mentions']) > 0:
+            filtered_out.append('user mention')
+
+        if query_object['max_hashtags'] < len(tweet.entities['hashtags']):
+            filtered_out.append('too many hashtags')
+
+        if query_object['max_urls'] < len(tweet.entities['urls']):
+            filtered_out.append('too many URLs')
+
+    if filtered_out:
+        logging.info(f'Filtered tweet (ID {tweet.id}) due to: {", ".join(filtered_out)}\n')
+        return False
 
     return True
-    
+
+
 def filter_timeline(timeline, query_object):
     """Performs global filtering on the timeline object returned by Tweepy"""
 
-    timeline = filter(lambda status: not any(word in status.text.split()
-                                                for word in query_object['word_blacklist']), timeline)
-    timeline = filter(
-        lambda status: status.author.screen_name not in query_object['user_blacklist'], timeline)
-    
-    timeline = list(timeline)
+    blacklist = set(query_object['word_blacklist'])
+    user_blacklist = set(query_object['user_blacklist'])
+
+    timeline = [status for status in timeline if not
+                any(word in status.text.split() for word in blacklist)]
+    timeline = [status for status in timeline if status.author.screen_name not in user_blacklist]
+
     timeline.reverse()
 
     return timeline

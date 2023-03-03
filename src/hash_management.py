@@ -1,4 +1,4 @@
-# Retweet Bot hashes management responsible for creating and maintaining search hashes
+"""Retweet Bot hashes management responsible for creating and maintaining search hashes"""
 
 import hashlib
 import logging
@@ -16,7 +16,7 @@ def get_hash_file_id(hashtag):
     """Gets the file id of the passed hashtag"""
 
     hashed_hashtag = hashlib.md5(hashtag.encode('ascii')).hexdigest()
-    last_id_filename = "last_id_hashtag_%s" % hashed_hashtag
+    last_id_filename = f"last_id_hashtag_{hashed_hashtag}"
     last_id_file = os.path.abspath(os.path.join(
         os.path.dirname(__file__), '..', 'hashes', last_id_filename))
 
