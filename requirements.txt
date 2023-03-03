@@ -1,1 +1,2 @@
-tweepy==3.5.0
+better_profanity==0.7.0
+tweepy==3.8.0
