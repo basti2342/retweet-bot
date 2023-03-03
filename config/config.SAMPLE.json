@@ -1,0 +1,59 @@
+{
+    "general": {
+        "log_level": "DEBUG"
+    },
+    "twitter_keys": {
+        "screen_name": "DevMicrocosm",
+        "consumer_key": "",
+        "consumer_secret": "",
+        "access_token": "",
+        "access_token_secret": ""
+    },
+    "follower_management": {
+        "manage_followers": true,
+        "aggressive_management": false,
+        "days_to_manage": [0],
+        "months_to_manage": [13],
+        "inactivity_period": 14,
+        "max_unfollows": 300,
+        "follow_back": true,
+        "max_follows": 25,
+        "remove_followers": false
+    },
+    "query_objects": [{
+        "search_query": "#test1",
+        "tweet_language": "es",
+        "tweet_limit": 5,
+        "follow_poster": true,
+        "user_blacklist": ["", ""],
+        "word_blacklist": ["RT", "♺"],
+        "days_to_tweet": [1],
+        "months_to_tweet": [1, 4, 10],
+        "favourite_tweets": false,
+        "max_hashtags": 4,
+        "max_urls": 1,
+        "filter_mentions": true,
+        "filter_media": false,
+        "require_media": false,
+        "retweet": false,
+        "filter_profanity": true
+    },
+    {
+        "search_query": "#test2",
+        "tweet_language": "en",
+        "tweet_limit": 10,
+        "follow_poster": false,
+        "user_blacklist": ["", ""],
+        "word_blacklist": ["RT", "♺"],
+        "days_to_tweet": [2, 4],
+        "months_to_tweet": [13],
+        "favourite_tweets": false,
+        "max_hashtags": 4,
+        "max_urls": 0,
+        "filter_mentions": false,
+        "filter_media": false,
+        "require_media": false,
+        "retweet": false,
+        "filter_profanity": false
+    }]
+}
